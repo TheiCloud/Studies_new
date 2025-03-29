@@ -69,7 +69,7 @@ class OfflineCourse(Course):
         return base_rating * 1.2  # Увеличиваем рейтинг на 20%
 
 
-
+print("Результат программы")
 python_online = OnlineCourse("Python Online", 10000, 40)
 print(f"Рейтинг онлайн-курса: {python_online.calculate_rating():.1f} руб/час")
 
