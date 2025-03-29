@@ -14,5 +14,22 @@ steps:
   displayName: 'Run a one-line script'
 
 - script: |
+
     echo "Проверка работы агента:"
   displayName: 'Проверка окружения'
+  
+- task: PowerShell@2
+  name: notify_telegram
+  displayName: "📢 Уведомление в Telegram"
+  inputs:
+    targetType: 'inline'
+    script: |
+      $status = if ("$(Build.Status)" -eq "Succeeded") { "✅" } else { "❌" }
+      $message = @"
+      $status Pipeline: <b>$(Build.DefinitionName)</b>
+      Branch: <code>$(Build.SourceBranchName)</code>
+      Build: <a href='$(Build.BuildUri)'>#$(Build.BuildNumber)</a>
+      "@
+      $url = "https://api.telegram.org/bot7802544152:AAFej-O8UOM3dce3HG0Vc8BEx7qZA_ZdvhQ/sendMessage?chat_id=-4729697131&parse_mode=HTML&text=$([System.Web.HttpUtility]::UrlEncode($message))"
+      Invoke-RestMethod -Uri $url
+  condition: always()
