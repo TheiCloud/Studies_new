@@ -36,6 +36,6 @@ steps:
       $encodedMessage = [System.Web.HttpUtility]::UrlEncode($message)
       
       # Отправка в Telegram
-      $url = "https://api.telegram.org/botВАШ_ТОКЕН/sendMessage?chat_id=ВАШ_CHAT_ID&parse_mode=HTML&text=$encodedMessage"
+      $url = "https://api.telegram.org/bot7802544152:AAFej-O8UOM3dce3HG0Vc8BEx7qZA_ZdvhQ/sendMessage?chat_id=-4729697131&parse_mode=HTML&text=$encodedMessage"
       Invoke-RestMethod -Uri $url
   condition: always()
