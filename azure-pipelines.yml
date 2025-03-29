@@ -24,25 +24,28 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      # Получаем статус сборки
-      $status = if ("$(Agent.JobStatus)" -eq "Succeeded") { "✅" } else { "❌" }
+      # Формируем статус
+      $status = if ("$(Agent.JobStatus)" -eq "Succeeded") { "✅ УСПЕХ" } else { "❌ ОШИБКА" }
       
-      # Формируем сообщение
+      # Создаем простое текстовое сообщение (без HTML)
       $message = @"
-      $status Pipeline: <b>$(Build.DefinitionName)</b>
-      Branch: <code>$(Build.SourceBranchName)</code>
-      Build: <a href='$(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)'>#$(Build.BuildNumber)</a>
+      $status
+      Pipeline: $(Build.DefinitionName)
+      Ветка: $(Build.SourceBranchName)
+      Сборка: #$(Build.BuildNumber)
+      Ссылка: $(System.CollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)
       "@
       
-      # Альтернативное кодирование URL (без System.Web)
-      $encodedMessage = $message -replace ' ', '%20' -replace '<', '%3C' -replace '>', '%3E'
+      # Кодируем только специальные символы
+      $encodedMessage = [System.Uri]::EscapeDataString($message)
       
-      # Отправляем в Telegram
-      $url = "https://api.telegram.org/bot7802544152:AAFej-O8UOM3dce3HG0Vc8BEx7qZA_ZdvhQ/sendMessage?chat_id=-4729697131&parse_mode=HTML&text=$encodedMessage"
+      # Отправляем
+      $url = "https://api.telegram.org/bot7802544152:AAFej-O8UOM3dce3HG0Vc8BEx7qZA_ZdvhQ/sendMessage?chat_id=-4729697131&text=$encodedMessage"
       try {
-        Invoke-RestMethod -Uri $url -Method Get
-        Write-Host "Уведомление отправлено!"
+        $response = Invoke-RestMethod -Uri $url
+        Write-Host "Уведомление отправлено: $($response | ConvertTo-Json -Depth 3)"
       } catch {
-        Write-Host "Ошибка отправки: $_"
+        Write-Host "Ошибка: $($_.Exception.Message)"
+        Write-Host "Подробности: $($_.Exception.Response | ConvertTo-Json -Depth 3)"
       }
   condition: always()
