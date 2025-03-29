@@ -24,12 +24,18 @@ steps:
   inputs:
     targetType: 'inline'
     script: |
-      $status = if ("$(Build.Status)" -eq "Succeeded") { "✅" } else { "❌" }
+      
+      $status = if ("$(Agent.JobStatus)" -eq "Succeeded") { "✅" } else { "❌" }
       $message = @"
       $status Pipeline: <b>$(Build.DefinitionName)</b>
       Branch: <code>$(Build.SourceBranchName)</code>
-      Build: <a href='$(Build.BuildUri)'>#$(Build.BuildNumber)</a>
+      Build: <a href='https://dev.azure.com/$(System.TeamFoundationCollectionUri)/$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)'>#$(Build.BuildNumber)</a>
       "@
-      $url = "https://api.telegram.org/bot7802544152:AAFej-O8UOM3dce3HG0Vc8BEx7qZA_ZdvhQ/sendMessage?chat_id=-4729697131&parse_mode=HTML&text=$([System.Web.HttpUtility]::UrlEncode($message))"
+      
+      # Кодируем сообщение для URL
+      $encodedMessage = [System.Web.HttpUtility]::UrlEncode($message)
+      
+      # Отправка в Telegram
+      $url = "https://api.telegram.org/botВАШ_ТОКЕН/sendMessage?chat_id=ВАШ_CHAT_ID&parse_mode=HTML&text=$encodedMessage"
       Invoke-RestMethod -Uri $url
   condition: always()
